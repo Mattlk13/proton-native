@@ -12,11 +12,36 @@ export function desktopSize(): Size {
 
 export abstract class BaseElement {
   element: any;
+  hasMouseTracking() {
+    return this.element.hasMouseTracking();
+  }
+  setMouseTracking(v: boolean) {
+    this.element.setMouseTracking(v);
+  }
   mousePressEvent(func: () => void) {
     this.element.mousePressEvent(func);
   }
   mouseReleaseEvent(func: () => void) {
     this.element.mouseReleaseEvent(func);
+  }
+  mouseMoveEvent(func: (x: number, y: number) => void) {
+    // TODO: Mouse tracking should be turned of when the event handler
+    // is being removed (not changed to a new function)
+    // This probably needs teardown logic in propsUpdater function
+    if (!this.hasMouseTracking()) {
+      this.setMouseTracking(true);
+    }
+
+    this.element.mouseMoveEvent(func);
+  }
+  enterEvent(func: () => void) {
+    this.element.enterEvent(func);
+  }
+  leaveEvent(func: () => void) {
+    this.element.leaveEvent(func);
+  }
+  moveEvent(func: (x: number, y: number) => void) {
+    this.element.moveEvent(func);
   }
   setStyleSheet(obj: object) {
     this.element.setStyleSheet(convertStyleSheet(obj));

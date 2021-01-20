@@ -6,6 +6,15 @@ import convertStyleSheet from "../utils/convertStyleSheet";
 import { YogaComponent } from "./YogaComponent";
 import { getBackend } from "../backends/index";
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface MouseMoveEvent {
+  point: Point;
+}
+
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -15,27 +24,36 @@ declare global {
 }
 
 type a = {
-  text?: string
+  text?: string;
 } & {
-  text: string
-}
+  text: string;
+};
 
 export interface Props {
   style?: React.CSSProperties;
   onResponderGrant?: () => void;
   onResponderRelease?: () => void;
+  onMouseMove?: (event: MouseMoveEvent) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export default (p: Props) => {
   const propTypes = {
     style: PropTypes.object,
     onResponderGrant: PropTypes.func,
-    onResponderRelease: PropTypes.func
+    onResponderRelease: PropTypes.func,
+    onMouseMove: PropTypes.func,
+    onMouseEnter: PropTypes.func,
+    onMouseLeave: PropTypes.func
   };
   const defaultProps = {
     style: {},
     onResponderGrant: () => {},
-    onResponderRelease: () => {}
+    onResponderRelease: () => {},
+    onMouseMove: (event: MouseMoveEvent) => {},
+    onMouseEnter: () => {},
+    onMouseLeave: () => {}
   };
 
   const ViewElement = getBackend()["ViewElement"];
@@ -48,7 +66,10 @@ export default (p: Props) => {
 
   const handlers = {
     onResponderGrant: props.onResponderGrant,
-    onResponderRelease: props.onResponderRelease
+    onResponderRelease: props.onResponderRelease,
+    onMouseMove: props.onMouseMove,
+    onMouseEnter: props.onMouseEnter,
+    onMouseLeave: props.onMouseLeave
   };
 
   element.mousePressEvent(() => {
@@ -61,6 +82,18 @@ export default (p: Props) => {
     if (handlers.onResponderRelease) {
       handlers.onResponderRelease();
     }
+  });
+
+  element.mouseMoveEvent((x: number, y: number) => {
+    handlers.onMouseMove!({ point: { x, y } });
+  });
+
+  element.enterEvent(() => {
+    handlers.onMouseEnter!();
+  });
+
+  element.leaveEvent(() => {
+    handlers.onMouseLeave!();
   });
 
   const containerProps = Container(
@@ -85,7 +118,13 @@ export default (p: Props) => {
   );
 
   const updateProps = propsUpdater(
-    [handlers, "onResponderGrant", "onResponderRelease"],
+    [
+      handlers,
+      "onResponderGrant",
+      "onResponderRelease",
+      "onMouseEnter",
+      "onMouseLeave"
+    ],
     {
       style: (style: React.CSSProperties) => {
         element.setStyleSheet(style);

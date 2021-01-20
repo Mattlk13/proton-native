@@ -1,6 +1,6 @@
 import * as yoga from "yoga-layout-prebuilt";
 import { getYogaValueTransformer } from "../utils/yogaHelper";
-import { BaseElement } from "../backends/qt";
+import { BaseElement, WindowElement } from "../backends/qt";
 
 export declare class Layout {
   readonly left: number;
@@ -77,8 +77,14 @@ export const YogaComponent = (
       }
     }
     if (!shouldUpdate) return;
-    element.resize(layout.width, layout.height);
-    element.move(layout.left, layout.top);
+
+    if (element instanceof WindowElement) {
+      return;
+    }
+
+    element!.resize(layout.width, layout.height);
+    element!.move(layout.left, layout.top);
+
     if (postApplyYoga) {
       postApplyYoga(layout);
     }
